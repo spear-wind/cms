@@ -5,10 +5,12 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/spear-wind/cms/auth"
 	"github.com/unrolled/render"
 )
 
-func newServer() *negroni.Negroni {
+// NewServer configures and returns a Server.
+func NewServer() *negroni.Negroni {
 	formatter := render.New(render.Options{
 		IndentJSON: true,
 	})
@@ -16,7 +18,7 @@ func newServer() *negroni.Negroni {
 	n := negroni.Classic()
 	mx := mux.NewRouter()
 	initRoutes(mx, formatter)
-
+	auth.InitRoutes(mx, formatter)
 	n.UseHandler(mx)
 	return n
 }

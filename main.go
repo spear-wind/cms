@@ -13,6 +13,6 @@ func main() {
 
 	fmt.Printf("Running server on port %v\n", port)
 
-	n := newServer()
-	n.Run(fmt.Sprintf(":%s", port))
+	server := NewServer()
+	server.Run(":" + port)
 }
