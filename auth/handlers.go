@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/codegangsta/negroni"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
@@ -16,7 +17,20 @@ var (
 
 func InitRoutes(router *mux.Router, formatter *render.Render) {
 	router.HandleFunc("/login", createLoginHandler(formatter)).Methods("POST")
-	router.HandleFunc("/verify", createVerifyHandler(formatter)).Methods("POST")
+}
+
+func IsAuthorized(formatter *render.Render) negroni.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+		token, err := parseToken(req)
+
+		if err != nil || token == nil {
+			formatter.JSON(w, http.StatusUnauthorized, struct{ Error string }{"Unauthorized."})
+		} else if err == nil && token.Valid != true {
+			formatter.JSON(w, http.StatusUnauthorized, struct{ Message string }{"Invalid Token."})
+		} else {
+			next(w, req)
+		}
+	}
 }
 
 func createLoginHandler(formatter *render.Render) http.HandlerFunc {
@@ -38,24 +52,18 @@ func createLoginHandler(formatter *render.Render) http.HandlerFunc {
 	}
 }
 
-func createVerifyHandler(formatter *render.Render) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		token, err := jwt.ParseFromRequest(req, func(token *jwt.Token) (interface{}, error) {
+func parseToken(req *http.Request) (*jwt.Token, error) {
+	token, err := jwt.ParseFromRequest(req, func(token *jwt.Token) (interface{}, error) {
 
-			fmt.Printf("token --- \nvalid: %v\nmethod: %v\nclaims: %v", token.Valid, token.Method, token.Claims)
+		fmt.Printf("token --- \nvalid: %v\nmethod: %v\nclaims: %v", token.Valid, token.Method, token.Claims)
 
-			// Don't forget to validate the alg is what you expect:
-			if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-			}
-
-			return signingKey, nil
-		})
-
-		if err == nil && token.Valid {
-			formatter.JSON(w, http.StatusOK, struct{ Message string }{"Valid Token"})
-		} else {
-			formatter.JSON(w, http.StatusOK, struct{ Message string }{"Bad Token: " + err.Error()})
+		// Don't forget to validate the alg is what you expect:
+		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-	}
+
+		return signingKey, nil
+	})
+
+	return token, err
 }
