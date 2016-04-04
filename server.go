@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/codegangsta/negroni"
@@ -10,12 +9,44 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/auth"
 	"github.com/spear-wind/cms/events"
+	"github.com/spear-wind/cms/registration"
 	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
 )
 
 // NewServer configures and returns a Server.
 func NewServer() *negroni.Negroni {
+	formatter := newFormatter()
+	emailSender := newEmailSender()
+	eventPublisher := newEventPublisher(emailSender)
+	userRepository := newUserRepository()
+
+	n := negroni.Classic()
+	router := mux.NewRouter()
+
+	auth.InitRoutes(router, formatter, userRepository)
+	registration.InitRoutes(router, formatter, userRepository, eventPublisher)
+
+	userRouter := mux.NewRouter()
+	user.InitRoutes(userRouter, formatter, userRepository, eventPublisher)
+	router.PathPrefix("/user").Handler(negroni.New(
+		negroni.HandlerFunc(auth.IsAuthorized(formatter)),
+		negroni.Wrap(userRouter),
+	))
+
+	n.UseHandler(router)
+	return n
+}
+
+func newFormatter() *render.Render {
+	formatter := render.New(render.Options{
+		IndentJSON: true,
+	})
+
+	return formatter
+}
+
+func newEmailSender() email.Sender {
 	awsEndpoint := os.Getenv("AWS_ENDPOINT")
 	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
@@ -27,42 +58,30 @@ func NewServer() *negroni.Negroni {
 		email.NewSender = email.NewNoopSender
 	}
 
+	return email.NewSender()
+}
+
+func newEventPublisher(emailSender email.Sender) events.EventPublisher {
 	eventPublisher := events.NewSynchEventPublisher()
-	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
-
-	formatter := render.New(render.Options{
-		IndentJSON: true,
-	})
-
-	n := negroni.Classic()
-	mx := mux.NewRouter()
-	initRoutes(mx, formatter)
-	auth.InitRoutes(mx, formatter)
-	user.InitRoutes(mx, formatter, eventPublisher)
-	n.UseHandler(mx)
-	return n
+	eventPublisher.Add(events.NewEmailEventSubscriber(emailSender))
+	return eventPublisher
 }
 
-func initRoutes(mx *mux.Router, formatter *render.Render) {
-	mx.HandleFunc("/test", testHandler(formatter)).Methods("GET")
-	mx.Handle("/securetest", wrapHandler(formatter, testSecureHandler(formatter)))
-}
+func newUserRepository() user.UserRepository {
+	profile := os.Getenv("PROFILE")
 
-func testHandler(formatter *render.Render) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		formatter.JSON(w, http.StatusOK, struct{ Test string }{"This is a test"})
+	var repo user.UserRepository
+
+	if profile == "mysql" {
+		// db, err := common.NewDbConn()
+		// if err != nil {
+		// 	repo = newMysqlRepository(db)
+		// }
+		//TODO - what backing store will we use for this service?
+	} else {
+		fmt.Println("Using in-memory repositories")
+		repo = user.NewInMemoryRepository()
 	}
-}
 
-func testSecureHandler(formatter *render.Render) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		formatter.JSON(w, http.StatusOK, struct{ Test string }{"This is a secured test"})
-	}
-}
-
-func wrapHandler(formatter *render.Render, handler http.HandlerFunc) *negroni.Negroni {
-	return negroni.New(
-		negroni.HandlerFunc(auth.IsAuthorized(formatter)),
-		negroni.Wrap(handler),
-	)
+	return repo
 }

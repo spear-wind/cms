@@ -21,3 +21,9 @@ The system is configured via environment variables. These are the available envi
 1. AWS_ACCESS_KEY_ID - your AWS Access Key ID, with SES rights
 1. AWS_SECRET_ACCESS_KEY - your AWS Secret Access Key, with SES rights
 1. EMAIL_TEMPLATE_DIR - the location of the directory containing all of the email templates
+
+
+## Testing
+Tests require slightly different setup.
+
+`EMAIL_TEMPLATE_DIR='../email-templates' go test ./...`

@@ -8,15 +8,16 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
 )
 
 var (
-	signingKey []byte = []byte("Rsw!MPC60$dCF$*jK%0R")
+	signingKey = []byte("Rsw!MPC60$dCF$*jK%0R")
 )
 
-func InitRoutes(router *mux.Router, formatter *render.Render) {
-	router.HandleFunc("/login", createLoginHandler(formatter)).Methods("POST")
+func InitRoutes(router *mux.Router, formatter *render.Render, userRepository user.UserRepository) {
+	router.HandleFunc("/login", loginHandler(formatter, userRepository)).Methods("POST")
 }
 
 func IsAuthorized(formatter *render.Render) negroni.HandlerFunc {
@@ -33,12 +34,36 @@ func IsAuthorized(formatter *render.Render) negroni.HandlerFunc {
 	}
 }
 
-func createLoginHandler(formatter *render.Render) http.HandlerFunc {
+func loginHandler(formatter *render.Render, userRepository user.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		email := req.PostFormValue("email")
+		password := req.PostFormValue("password")
+
+		if email == "" || password == "" {
+			formatter.Text(w, http.StatusBadRequest, "Username and Password are required")
+			return
+		}
+
+		user := userRepository.FindByEmail(email)
+		if user == nil {
+			formatter.Text(w, http.StatusNotFound, "User Not Found")
+			return
+		}
+
+		success, newHash := user.Authenticate(password)
+		if success != true {
+			formatter.Text(w, http.StatusUnauthorized, "Unauthorized.")
+			return
+		}
+
+		if newHash {
+			fmt.Println("Call to user.Authenticate resulted in newHash == true; we'll need to update this in the DB or next auth attempt will fail")
+		}
+
 		// Create the token
 		token := jwt.New(jwt.SigningMethodHS256)
-		// Set some claims
-		token.Claims["foo"] = "bar"
+		//TODO - Set some claims
+		//token.Claims["foo"] = "bar"
 		token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 		// Sign and get the complete encoded token as a string
 		tokenString, err := token.SignedString(signingKey)

@@ -10,9 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codegangsta/negroni"
 	"github.com/dave-malone/email"
-	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/events"
 	"github.com/unrolled/render"
 )
@@ -26,7 +24,7 @@ var (
 func TestCreateUserHandlerResponseToInvalidData(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
-	repo := newInMemoryRepository()
+	repo := NewInMemoryRepository()
 
 	eventPublisher := events.NewSynchEventPublisher()
 	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
@@ -56,7 +54,7 @@ func TestCreateUserHandlerResponseToInvalidData(t *testing.T) {
 func TestCreateUserHandlerResponseToBadJson(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
-	repo := newInMemoryRepository()
+	repo := NewInMemoryRepository()
 	eventPublisher := events.NewSynchEventPublisher()
 	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
 	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo, eventPublisher)))
@@ -83,7 +81,7 @@ func TestCreateUserHandlerResponseToBadJson(t *testing.T) {
 func TestCreateUserHandler(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
-	repo := newInMemoryRepository()
+	repo := NewInMemoryRepository()
 	eventPublisher := events.NewSynchEventPublisher()
 	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
 	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo, eventPublisher)))
@@ -165,7 +163,7 @@ func TestCreateUserHandler(t *testing.T) {
 func TestGetUserListReturnsEmptyArrayForNoUsers(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
-	repo := newInMemoryRepository()
+	repo := NewInMemoryRepository()
 	server := httptest.NewServer(http.HandlerFunc(getUserListHandler(formatter, repo)))
 	defer server.Close()
 
@@ -198,10 +196,10 @@ func TestGetUserListReturnsEmptyArrayForNoUsers(t *testing.T) {
 func TestGetUserListReturnsWhatsInRepository(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
-	repo := newInMemoryRepository()
-	repo.add(*newUser(-1, "John", "Doe", "john@doe.com"))
-	repo.add(*newUser(-1, "Jane", "Doe", "jane@doe.com"))
-	repo.add(*newUser(-1, "Baby", "Doe", "baby@doe.com"))
+	repo := NewInMemoryRepository()
+	repo.Add(*newUser(-1, "John", "Doe", "john@doe.com"))
+	repo.Add(*newUser(-1, "Jane", "Doe", "jane@doe.com"))
+	repo.Add(*newUser(-1, "Baby", "Doe", "baby@doe.com"))
 	server := httptest.NewServer(http.HandlerFunc(getUserListHandler(formatter, repo)))
 	defer server.Close()
 
@@ -229,14 +227,4 @@ func TestGetUserListReturnsWhatsInRepository(t *testing.T) {
 	if len(userListResponse.Users) != 3 {
 		t.Errorf("Expected exactly three users in the user response, but got %d", len(userListResponse.Users))
 	}
-}
-
-func MakeTestServer() *negroni.Negroni {
-	server := negroni.New() // don't need all the middleware here or logging.
-	router := mux.NewRouter()
-	eventPublisher := events.NewSynchEventPublisher()
-	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
-	InitRoutes(router, formatter, eventPublisher)
-	server.UseHandler(router)
-	return server
 }

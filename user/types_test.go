@@ -35,14 +35,14 @@ func TestRegister(t *testing.T) {
 		Password:  "p@$$w0rd",
 	}
 
-	result, err := user.register()
+	result, err := user.Register()
 
 	if result.HasErrors() != false {
 		t.Fatal("Expected validation to pass with all required fields, but it did not")
 	}
 
 	if err != nil {
-		t.Errorf("user.register() returned with an unexpected error: %v", err)
+		t.Errorf("user.Register() returned with an unexpected error: %v", err)
 	}
 
 	if user.Password != "" {
@@ -75,10 +75,10 @@ func TestVerifyUnverifiedUser(t *testing.T) {
 		hash:             "hashed-password",
 	}
 
-	err := user.verify(verificationCode)
+	err := user.Verify(verificationCode)
 
 	if err != nil {
-		t.Errorf("user.verify returned an unexpected error: %v", err)
+		t.Errorf("user.Verify returned an unexpected error: %v", err)
 	}
 
 	if user.VerificationCode != "" {
@@ -103,7 +103,7 @@ func TestVerifyVerifiedUserReturnsError(t *testing.T) {
 		hash:             "hashed-password",
 	}
 
-	err := user.verify(verificationCode)
+	err := user.Verify(verificationCode)
 
 	if err == nil {
 		t.Errorf("Calling verify on a user with .Verified = true should return an error")
@@ -121,7 +121,7 @@ func TestVerifyWithInvalidVerificationCodeReturnsError(t *testing.T) {
 		hash:             "hashed-password",
 	}
 
-	err := user.verify("321CBA")
+	err := user.Verify("321CBA")
 
 	if err == nil {
 		t.Errorf("Unmatching verification codes should cause an error")
@@ -133,5 +133,34 @@ func TestVerifyWithInvalidVerificationCodeReturnsError(t *testing.T) {
 
 	if user.Verified != false {
 		t.Errorf("user.Verified should be false after a failed verification")
+	}
+}
+
+func TestAuthenticate(t *testing.T) {
+	password := "p@$$w0rd"
+	user := User{
+		FirstName: "John",
+		LastName:  "Doe",
+		Email:     "john@tld.com",
+		Password:  password,
+	}
+
+	result, err := user.Register()
+
+	if result.HasErrors() != false {
+		t.Fatal("Expected validation to pass with all required fields, but it did not")
+	}
+
+	if err != nil {
+		t.Fatalf("user.Register() returned with an unexpected error: %v", err)
+	}
+
+	success, newHash := user.Authenticate(password)
+	if success != true {
+		t.Errorf("Authentication failed when it shouldn't have")
+	}
+
+	if newHash {
+		t.Errorf("Call to user.Authenticate resulted in newHash == true; we'll need to update this in the DB or next auth attempt will fail")
 	}
 }

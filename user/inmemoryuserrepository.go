@@ -9,19 +9,19 @@ type inMemoryRepository struct {
 	users map[int64]User
 }
 
-func newInMemoryRepository() *inMemoryRepository {
+func NewInMemoryRepository() *inMemoryRepository {
 	repo := &inMemoryRepository{}
 	repo.users = make(map[int64]User)
 	return repo
 }
 
-func (repo *inMemoryRepository) add(user User) (err error) {
+func (repo *inMemoryRepository) Add(user User) (err error) {
 	user.ID = int64(len(repo.users))
 	repo.users[user.ID] = user
 	return err
 }
 
-func (repo *inMemoryRepository) update(user User) (err error) {
+func (repo *inMemoryRepository) Update(user User) (err error) {
 	repo.users[user.ID] = user
 	return err
 }
@@ -49,7 +49,7 @@ func (repo *inMemoryRepository) getUser(id string) (user User, err error) {
 	return user, err
 }
 
-func (repo *inMemoryRepository) findByVerificationCode(verificationCode string) (user *User) {
+func (repo *inMemoryRepository) FindByVerificationCode(verificationCode string) (user *User) {
 	for _, target := range repo.users {
 		if target.VerificationCode == verificationCode {
 			user = &target
@@ -60,7 +60,18 @@ func (repo *inMemoryRepository) findByVerificationCode(verificationCode string) 
 	return user
 }
 
-func (repo *inMemoryRepository) exists(user User) bool {
+func (repo *inMemoryRepository) FindByEmail(email string) (user *User) {
+	for _, target := range repo.users {
+		if target.Email == email {
+			user = &target
+			break
+		}
+	}
+
+	return user
+}
+
+func (repo *inMemoryRepository) Exists(user User) bool {
 	for _, target := range repo.users {
 		if user.Email == target.Email {
 			return true

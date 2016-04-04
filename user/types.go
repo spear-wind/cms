@@ -9,13 +9,14 @@ import (
 	"gopkg.in/hlandau/passlib.v1"
 )
 
-type repository interface {
-	add(user User) (err error)
-	update(user User) (err error)
+type UserRepository interface {
+	Add(user User) (err error)
+	Update(user User) (err error)
 	listUsers() (users []User)
 	getUser(id string) (user User, err error)
-	exists(user User) bool
-	findByVerificationCode(verificationCode string) (user *User)
+	Exists(user User) bool
+	FindByEmail(emailAddress string) (user *User)
+	FindByVerificationCode(verificationCode string) (user *User)
 }
 
 type User struct {
@@ -69,7 +70,7 @@ func (user *User) validate() (result validator.ValidationResult) {
 	return result
 }
 
-func (user *User) register() (validator.ValidationResult, error) {
+func (user *User) Register() (validator.ValidationResult, error) {
 	result := user.validate()
 
 	if result.HasErrors() {
@@ -97,7 +98,7 @@ func (user *User) register() (validator.ValidationResult, error) {
 	return result, nil
 }
 
-func (user *User) verify(verificationCode string) error {
+func (user *User) Verify(verificationCode string) error {
 	if user.Verified == true {
 		return errors.New("This user has already been verified")
 	}
@@ -112,9 +113,10 @@ func (user *User) verify(verificationCode string) error {
 	return nil
 }
 
-func (user *User) authenicate(password string) (bool, bool) {
-	newHash, err := passlib.Verify(password, user.Password)
+func (user *User) Authenticate(password string) (bool, bool) {
+	newHash, err := passlib.Verify(password, user.hash)
 	if err != nil {
+		fmt.Printf("passlib.Verify resulted in an error: %v", err)
 		// incorrect password, malformed hash, etc.
 		// either way, reject
 		return false, false
