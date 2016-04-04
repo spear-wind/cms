@@ -21,8 +21,8 @@ var (
 func InitRoutes(router *mux.Router, formatter *render.Render, eventPublisher events.EventPublisher) {
 	repo := repo()
 
-	router.HandleFunc("/user/register", userRegistrationHandler(formatter, repo, eventPublisher)).Methods("POST")
-	router.HandleFunc("/user/verify/{verificationCode}", emailVerificationHandler(formatter, repo)).Methods("GET")
+	router.HandleFunc("/register", userRegistrationHandler(formatter, repo, eventPublisher)).Methods("POST")
+	router.HandleFunc("/verify/{verificationCode}", userVerificationHandler(formatter, repo)).Methods("POST")
 	router.HandleFunc("/user", createUserHandler(formatter, repo, eventPublisher)).Methods("POST")
 	router.HandleFunc("/user", getUserListHandler(formatter, repo)).Methods("GET")
 	router.HandleFunc("/user/{id}", getUserHandler(formatter, repo)).Methods("GET")
@@ -93,7 +93,7 @@ func userRegistrationHandler(formatter *render.Render, repo repository, eventPub
 	}
 }
 
-func emailVerificationHandler(formatter *render.Render, repo repository) http.HandlerFunc {
+func userVerificationHandler(formatter *render.Render, repo repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
 		verificationCode := vars["verificationCode"]
