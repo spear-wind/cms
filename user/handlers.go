@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dave-malone/email"
 	"github.com/gorilla/mux"
+	"github.com/spear-wind/cms/events"
 	"github.com/unrolled/render"
 )
 
@@ -18,13 +18,12 @@ var (
 	ErrUserDoesntExist = errors.New("This user doesnt exist")
 )
 
-func InitRoutes(router *mux.Router, formatter *render.Render) {
+func InitRoutes(router *mux.Router, formatter *render.Render, eventPublisher events.EventPublisher) {
 	repo := repo()
-	sender := email.NewSender()
 
-	router.HandleFunc("/user/register", userRegistrationHandler(formatter, repo, sender)).Methods("POST")
+	router.HandleFunc("/user/register", userRegistrationHandler(formatter, repo, eventPublisher)).Methods("POST")
 	router.HandleFunc("/user/verify/{verificationCode}", emailVerificationHandler(formatter, repo)).Methods("GET")
-	router.HandleFunc("/user", createUserHandler(formatter, repo, sender)).Methods("POST")
+	router.HandleFunc("/user", createUserHandler(formatter, repo, eventPublisher)).Methods("POST")
 	router.HandleFunc("/user", getUserListHandler(formatter, repo)).Methods("GET")
 	router.HandleFunc("/user/{id}", getUserHandler(formatter, repo)).Methods("GET")
 }
@@ -48,7 +47,7 @@ func repo() repository {
 	return repo
 }
 
-func userRegistrationHandler(formatter *render.Render, repo repository, sender email.Sender) http.HandlerFunc {
+func userRegistrationHandler(formatter *render.Render, repo repository, eventPublisher events.EventPublisher) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		payload, _ := ioutil.ReadAll(req.Body)
 		var user User
@@ -89,17 +88,8 @@ func userRegistrationHandler(formatter *render.Render, repo repository, sender e
 		w.Header().Add("Location", fmt.Sprintf("/user/%d", user.ID))
 		formatter.JSON(w, http.StatusCreated, user)
 
-		//TODO - refactor this to use some sort of ApplicationEvents framework
-		messageBody := email.NewFileBasedHTMLTemplateMessageBody("./email-templates/user-registration.tpl", user)
-
-		emailMessage := email.NewMessage(
-			"no-reply@spearwind.io",
-			user.Email,
-			"SpearWind.io - New Account Verification",
-			messageBody,
-		)
-
-		sender.Send(emailMessage)
+		eventPublisher.Publish(events.NewUserRegistrationEvent(user.Email, user.VerificationCode))
+		fmt.Printf("New user registration event published; verification code: %s", user.VerificationCode)
 	}
 }
 
@@ -136,7 +126,7 @@ func emailVerificationHandler(formatter *render.Render, repo repository) http.Ha
 	}
 }
 
-func createUserHandler(formatter *render.Render, repo repository, sender email.Sender) http.HandlerFunc {
+func createUserHandler(formatter *render.Render, repo repository, eventPublisher events.EventPublisher) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		payload, _ := ioutil.ReadAll(req.Body)
 		var user User

@@ -23,10 +23,10 @@ type User struct {
 	Email            string `json:"email"`
 	FirstName        string `json:"first_name"`
 	LastName         string `json:"last_name"`
-	Password         string `json:"password"`
+	Password         string `json:"password,omitempty"`
 	hash             string
 	Verified         bool   `json:"verified"`
-	VerificationCode string `json:"verification_code"`
+	VerificationCode string `json:"-"`
 }
 
 type userListResponse struct {

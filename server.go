@@ -9,6 +9,7 @@ import (
 	"github.com/dave-malone/email"
 	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/auth"
+	"github.com/spear-wind/cms/events"
 	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
 )
@@ -26,6 +27,9 @@ func NewServer() *negroni.Negroni {
 		email.NewSender = email.NewNoopSender
 	}
 
+	eventPublisher := events.NewSynchEventPublisher()
+	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
+
 	formatter := render.New(render.Options{
 		IndentJSON: true,
 	})
@@ -34,7 +38,7 @@ func NewServer() *negroni.Negroni {
 	mx := mux.NewRouter()
 	initRoutes(mx, formatter)
 	auth.InitRoutes(mx, formatter)
-	user.InitRoutes(mx, formatter)
+	user.InitRoutes(mx, formatter, eventPublisher)
 	n.UseHandler(mx)
 	return n
 }

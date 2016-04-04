@@ -13,6 +13,7 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/dave-malone/email"
 	"github.com/gorilla/mux"
+	"github.com/spear-wind/cms/events"
 	"github.com/unrolled/render"
 )
 
@@ -26,7 +27,11 @@ func TestCreateUserHandlerResponseToInvalidData(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
 	repo := newInMemoryRepository()
-	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo)))
+
+	eventPublisher := events.NewSynchEventPublisher()
+	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
+
+	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo, eventPublisher)))
 	defer server.Close()
 
 	invalidBody := []byte("not even json")
@@ -52,7 +57,9 @@ func TestCreateUserHandlerResponseToBadJson(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
 	repo := newInMemoryRepository()
-	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo)))
+	eventPublisher := events.NewSynchEventPublisher()
+	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
+	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo, eventPublisher)))
 	defer server.Close()
 
 	badJSON := []byte("{\"test\":\"bad json! bad!\"}")
@@ -77,7 +84,9 @@ func TestCreateUserHandler(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
 	repo := newInMemoryRepository()
-	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo)))
+	eventPublisher := events.NewSynchEventPublisher()
+	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
+	server := httptest.NewServer(http.HandlerFunc(createUserHandler(formatter, repo, eventPublisher)))
 	defer server.Close()
 
 	body := []byte("{\"first_name\":\"john\", \"last_name\":\"doe\", \"email\":\"john@doe.com\", \"password\":\"p@$$w3Rd\"}")
@@ -225,7 +234,9 @@ func TestGetUserListReturnsWhatsInRepository(t *testing.T) {
 func MakeTestServer() *negroni.Negroni {
 	server := negroni.New() // don't need all the middleware here or logging.
 	router := mux.NewRouter()
-	InitRoutes(router, formatter)
+	eventPublisher := events.NewSynchEventPublisher()
+	eventPublisher.Add(events.NewEmailEventSubscriber(email.NewSender()))
+	InitRoutes(router, formatter, eventPublisher)
 	server.UseHandler(router)
 	return server
 }
