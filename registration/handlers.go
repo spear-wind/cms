@@ -27,7 +27,7 @@ func userRegistrationHandler(formatter *render.Render, userRepository user.UserR
 			return
 		}
 
-		if userRepository.Exists(user) {
+		if userRepository.Exists(&user) {
 			formatter.JSON(w, http.StatusBadRequest, map[string]interface{}{
 				"errors": "This user already exists",
 			})
@@ -46,7 +46,7 @@ func userRegistrationHandler(formatter *render.Render, userRepository user.UserR
 			return
 		}
 
-		if err := userRepository.Add(user); err != nil {
+		if err := userRepository.Add(&user); err != nil {
 			formatter.JSON(w, http.StatusInternalServerError, map[string]interface{}{
 				"user":  user,
 				"error": err.Error(),
@@ -83,7 +83,7 @@ func userVerificationHandler(formatter *render.Render, userRepository user.UserR
 			return
 		}
 
-		if err := userRepository.Update(*user); err != nil {
+		if err := userRepository.Update(user); err != nil {
 			formatter.JSON(w, http.StatusBadRequest, map[string]interface{}{
 				"errors": err.Error(),
 			})

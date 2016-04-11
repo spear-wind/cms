@@ -41,7 +41,7 @@ func createUserHandler(formatter *render.Render, userRepository UserRepository, 
 			return
 		}
 
-		if err := userRepository.Add(user); err != nil {
+		if err := userRepository.Add(&user); err != nil {
 			formatter.JSON(w, http.StatusInternalServerError, map[string]interface{}{
 				"user":  user,
 				"error": err.Error(),

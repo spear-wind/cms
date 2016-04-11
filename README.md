@@ -21,6 +21,8 @@ The system is configured via environment variables. These are the available envi
 1. AWS_ACCESS_KEY_ID - your AWS Access Key ID, with SES rights
 1. AWS_SECRET_ACCESS_KEY - your AWS Secret Access Key, with SES rights
 1. EMAIL_TEMPLATE_DIR - the location of the directory containing all of the email templates
+1. FB_APP_ID - Facebook Application ID, for use with Facebook Login
+1. FB_APP_SECRET  - Facebook Application Secret, for use with Facebook Login
 
 
 ## Testing

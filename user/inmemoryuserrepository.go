@@ -6,27 +6,27 @@ import (
 )
 
 type inMemoryRepository struct {
-	users map[int64]User
+	users map[int64]*User
 }
 
 func NewInMemoryRepository() *inMemoryRepository {
 	repo := &inMemoryRepository{}
-	repo.users = make(map[int64]User)
+	repo.users = make(map[int64]*User)
 	return repo
 }
 
-func (repo *inMemoryRepository) Add(user User) (err error) {
-	user.ID = int64(len(repo.users))
+func (repo *inMemoryRepository) Add(user *User) (err error) {
+	user.ID = int64(len(repo.users) + 1)
 	repo.users[user.ID] = user
 	return err
 }
 
-func (repo *inMemoryRepository) Update(user User) (err error) {
+func (repo *inMemoryRepository) Update(user *User) (err error) {
 	repo.users[user.ID] = user
 	return err
 }
 
-func (repo *inMemoryRepository) listUsers() (users []User) {
+func (repo *inMemoryRepository) listUsers() (users []*User) {
 	for _, user := range repo.users {
 		users = append(users, user)
 	}
@@ -34,7 +34,7 @@ func (repo *inMemoryRepository) listUsers() (users []User) {
 	return users
 }
 
-func (repo *inMemoryRepository) getUser(id string) (user User, err error) {
+func (repo *inMemoryRepository) getUser(id string) (user *User, err error) {
 	found := false
 
 	for _, target := range repo.users {
@@ -52,7 +52,7 @@ func (repo *inMemoryRepository) getUser(id string) (user User, err error) {
 func (repo *inMemoryRepository) FindByVerificationCode(verificationCode string) (user *User) {
 	for _, target := range repo.users {
 		if target.VerificationCode == verificationCode {
-			user = &target
+			user = target
 			break
 		}
 	}
@@ -63,7 +63,7 @@ func (repo *inMemoryRepository) FindByVerificationCode(verificationCode string) 
 func (repo *inMemoryRepository) FindByEmail(email string) (user *User) {
 	for _, target := range repo.users {
 		if target.Email == email {
-			user = &target
+			user = target
 			break
 		}
 	}
@@ -71,10 +71,10 @@ func (repo *inMemoryRepository) FindByEmail(email string) (user *User) {
 	return user
 }
 
-func (repo *inMemoryRepository) FindByFacebookID(facebookID int64) (user *User) {
+func (repo *inMemoryRepository) FindByFacebookID(facebookID string) (user *User) {
 	for _, target := range repo.users {
 		if target.FacebookID == facebookID {
-			user = &target
+			user = target
 			break
 		}
 	}
@@ -82,7 +82,7 @@ func (repo *inMemoryRepository) FindByFacebookID(facebookID int64) (user *User) 
 	return user
 }
 
-func (repo *inMemoryRepository) Exists(user User) bool {
+func (repo *inMemoryRepository) Exists(user *User) bool {
 	for _, target := range repo.users {
 		if user.Email == target.Email {
 			return true

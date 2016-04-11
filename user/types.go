@@ -10,19 +10,19 @@ import (
 )
 
 type UserRepository interface {
-	Add(user User) (err error)
-	Update(user User) (err error)
-	listUsers() (users []User)
-	getUser(id string) (user User, err error)
-	Exists(user User) bool
+	Add(user *User) (err error)
+	Update(user *User) (err error)
+	listUsers() (users []*User)
+	getUser(id string) (user *User, err error)
+	Exists(user *User) bool
 	FindByEmail(emailAddress string) (user *User)
 	FindByVerificationCode(verificationCode string) (user *User)
-	FindByFacebookID(facebookID int64) (user *User)
+	FindByFacebookID(facebookID string) (user *User)
 }
 
 type User struct {
 	ID               int64  `json:"id"`
-	FacebookID       int64  `json:"-"`
+	FacebookID       string `json:"fb_id"`
 	Email            string `json:"email"`
 	FirstName        string `json:"first_name"`
 	LastName         string `json:"last_name"`
@@ -43,15 +43,6 @@ func NewUser(ID int64, FirstName string, LastName string, Email string) *User {
 		FirstName: FirstName,
 		LastName:  LastName,
 		Email:     Email,
-	}
-}
-
-func NewFacebookUser(FacebookID int64, FirstName string, LastName string, Email string) *User {
-	return &User{
-		FacebookID: FacebookID,
-		FirstName:  FirstName,
-		LastName:   LastName,
-		Email:      Email,
 	}
 }
 

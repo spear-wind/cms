@@ -31,7 +31,7 @@ func NewUserRegistrationEvent(emailAddress string, verificationCode string) *Ema
 	emailTemplateDir := os.Getenv("EMAIL_TEMPLATE_DIR")
 	if emailTemplateDir == "" {
 		emailTemplateDir = "../email-templates"
-		fmt.Printf("Using %s as the email template directory. Please set env var EMAIL_TEMPLATE_DIR to override this setting", emailTemplateDir)
+		fmt.Printf("Using %s as the email template directory. Please set env var EMAIL_TEMPLATE_DIR to override this setting\n", emailTemplateDir)
 	}
 
 	messageBody := email.NewFileBasedHTMLTemplateMessageBody(emailTemplateDir+"/user-registration.tpl", verificationCode)

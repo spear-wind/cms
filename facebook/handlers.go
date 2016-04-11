@@ -2,6 +2,7 @@ package facebook
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -26,16 +27,36 @@ func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepo
 			return
 		}
 
+		fmt.Printf("fb user id: %v", cmd.UserID)
+
 		fbUser, err := fbClient.getUser(cmd)
+
+		fmt.Printf("fb user id: %v", fbUser.FacebookID)
 
 		if err != nil {
 			formatter.Text(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		//TODO look up user by fb id
-		//TODO - look up user by email
-		//TODO - save new or update existing user
+		existingUser := userRepository.FindByFacebookID(fbUser.FacebookID)
+		if existingUser == nil {
+			existingUser = userRepository.FindByEmail(fbUser.Email)
+
+			if existingUser != nil {
+				existingUser.FacebookID = fbUser.FacebookID
+				if err := userRepository.Update(existingUser); err != nil {
+					formatter.JSON(w, http.StatusOK, struct{ Message string }{err.Error()})
+					return
+				}
+			} else {
+				if err := userRepository.Add(fbUser); err != nil {
+					formatter.JSON(w, http.StatusOK, struct{ Message string }{err.Error()})
+					return
+				}
+
+				existingUser = fbUser
+			}
+		}
 
 		tokenString, err := auth.GenerateToken()
 		if err != nil {
@@ -47,7 +68,7 @@ func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepo
 			User  *user.User
 			Token string
 		}{
-			fbUser,
+			existingUser,
 			tokenString,
 		}
 

@@ -12,7 +12,7 @@ type loginCommand struct {
 	//UNIX time when the token expires and needs to be renewed
 	ExpiresIn     int64  `json:"expires_in"`
 	SignedRequest string `json:"signed_request"`
-	UserID        int64  `json:"userID"`
+	UserID        string `json:"id"`
 }
 
 func (cmd loginCommand) String() string {
