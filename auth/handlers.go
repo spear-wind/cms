@@ -57,17 +57,10 @@ func loginHandler(formatter *render.Render, userRepository user.UserRepository) 
 		}
 
 		if newHash {
-			fmt.Println("Call to user.Authenticate resulted in newHash == true; we'll need to update this in the DB or next auth attempt will fail")
+			fmt.Println("Call to user.Authenticate resulted in newHash == true; we need to update this in the DB or next auth attempt will fail")
 		}
 
-		// Create the token
-		token := jwt.New(jwt.SigningMethodHS256)
-		//TODO - Set some claims
-		//token.Claims["foo"] = "bar"
-		token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-		// Sign and get the complete encoded token as a string
-		tokenString, err := token.SignedString(signingKey)
-
+		tokenString, err := GenerateToken()
 		if err != nil {
 			formatter.JSON(w, http.StatusOK, struct{ Message string }{err.Error()})
 			return
@@ -75,6 +68,18 @@ func loginHandler(formatter *render.Render, userRepository user.UserRepository) 
 
 		formatter.JSON(w, http.StatusOK, struct{ Token string }{tokenString})
 	}
+}
+
+func GenerateToken() (string, error) {
+	// Create the token
+	token := jwt.New(jwt.SigningMethodHS256)
+	//TODO - Set some claims
+	//token.Claims["foo"] = "bar"
+	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	// Sign and get the complete encoded token as a string
+	tokenString, err := token.SignedString(signingKey)
+
+	return tokenString, err
 }
 
 func parseToken(req *http.Request) (*jwt.Token, error) {

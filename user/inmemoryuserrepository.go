@@ -71,6 +71,17 @@ func (repo *inMemoryRepository) FindByEmail(email string) (user *User) {
 	return user
 }
 
+func (repo *inMemoryRepository) FindByFacebookID(facebookID int64) (user *User) {
+	for _, target := range repo.users {
+		if target.FacebookID == facebookID {
+			user = &target
+			break
+		}
+	}
+
+	return user
+}
+
 func (repo *inMemoryRepository) Exists(user User) bool {
 	for _, target := range repo.users {
 		if user.Email == target.Email {

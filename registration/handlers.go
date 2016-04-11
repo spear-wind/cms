@@ -59,7 +59,7 @@ func userRegistrationHandler(formatter *render.Render, userRepository user.UserR
 		formatter.JSON(w, http.StatusCreated, user)
 
 		eventPublisher.Publish(events.NewUserRegistrationEvent(user.Email, user.VerificationCode))
-		fmt.Printf("New user registration event published; verification code: %s", user.VerificationCode)
+		fmt.Printf("New user registration event published; verification code: %s\n", user.VerificationCode)
 	}
 }
 

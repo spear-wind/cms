@@ -3,7 +3,7 @@ package user
 import "testing"
 
 func TestValidateWithEmptyRequiredFieldsFailsWithErrors(t *testing.T) {
-	user := newUser(-1, "", "", "")
+	user := NewUser(-1, "", "", "")
 
 	result := user.validate()
 

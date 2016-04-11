@@ -17,10 +17,12 @@ type UserRepository interface {
 	Exists(user User) bool
 	FindByEmail(emailAddress string) (user *User)
 	FindByVerificationCode(verificationCode string) (user *User)
+	FindByFacebookID(facebookID int64) (user *User)
 }
 
 type User struct {
 	ID               int64  `json:"id"`
+	FacebookID       int64  `json:"-"`
 	Email            string `json:"email"`
 	FirstName        string `json:"first_name"`
 	LastName         string `json:"last_name"`
@@ -35,12 +37,21 @@ type userListResponse struct {
 	Users []User `json:"users"`
 }
 
-func newUser(ID int64, FirstName string, LastName string, Email string) *User {
+func NewUser(ID int64, FirstName string, LastName string, Email string) *User {
 	return &User{
 		ID:        ID,
 		FirstName: FirstName,
 		LastName:  LastName,
 		Email:     Email,
+	}
+}
+
+func NewFacebookUser(FacebookID int64, FirstName string, LastName string, Email string) *User {
+	return &User{
+		FacebookID: FacebookID,
+		FirstName:  FirstName,
+		LastName:   LastName,
+		Email:      Email,
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/auth"
 	"github.com/spear-wind/cms/events"
+	"github.com/spear-wind/cms/facebook"
 	"github.com/spear-wind/cms/registration"
 	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
@@ -20,12 +21,14 @@ func NewServer() *negroni.Negroni {
 	emailSender := newEmailSender()
 	eventPublisher := newEventPublisher(emailSender)
 	userRepository := newUserRepository()
+	facebookClient := newFacebookClient()
 
 	n := negroni.Classic()
 	router := mux.NewRouter()
 
 	auth.InitRoutes(router, formatter, userRepository)
 	registration.InitRoutes(router, formatter, userRepository, eventPublisher)
+	facebook.InitRoutes(router, formatter, userRepository, facebookClient)
 
 	userRouter := mux.NewRouter()
 	user.InitRoutes(userRouter, formatter, userRepository, eventPublisher)
@@ -84,4 +87,11 @@ func newUserRepository() user.UserRepository {
 	}
 
 	return repo
+}
+
+func newFacebookClient() *facebook.Client {
+	appId := os.Getenv("FB_APP_ID")
+	appSecret := os.Getenv("FB_APP_SECRET")
+
+	return facebook.NewClient(appId, appSecret)
 }

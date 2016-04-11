@@ -197,9 +197,9 @@ func TestGetUserListReturnsWhatsInRepository(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
 	repo := NewInMemoryRepository()
-	repo.Add(*newUser(-1, "John", "Doe", "john@doe.com"))
-	repo.Add(*newUser(-1, "Jane", "Doe", "jane@doe.com"))
-	repo.Add(*newUser(-1, "Baby", "Doe", "baby@doe.com"))
+	repo.Add(*NewUser(-1, "John", "Doe", "john@doe.com"))
+	repo.Add(*NewUser(-1, "Jane", "Doe", "jane@doe.com"))
+	repo.Add(*NewUser(-1, "Baby", "Doe", "baby@doe.com"))
 	server := httptest.NewServer(http.HandlerFunc(getUserListHandler(formatter, repo)))
 	defer server.Close()
 
