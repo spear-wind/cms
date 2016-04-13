@@ -64,7 +64,7 @@ func TestLoginHandlerHappyPath(t *testing.T) {
 		t.Fatalf("user.Register() returned with an unexpected error: %v", err)
 	}
 
-	userRepository.Add(user)
+	userRepository.Add(&user)
 
 	server := httptest.NewServer(http.HandlerFunc(loginHandler(formatter, userRepository)))
 

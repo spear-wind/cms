@@ -36,8 +36,8 @@ func IsAuthorized(formatter *render.Render) negroni.HandlerFunc {
 
 func loginHandler(formatter *render.Render, userRepository user.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		email := req.PostFormValue("email")
-		password := req.PostFormValue("password")
+		email := req.FormValue("email")
+		password := req.FormValue("password")
 
 		if email == "" || password == "" {
 			formatter.Text(w, http.StatusBadRequest, "Username and Password are required")
@@ -60,7 +60,7 @@ func loginHandler(formatter *render.Render, userRepository user.UserRepository) 
 			fmt.Println("Call to user.Authenticate resulted in newHash == true; we need to update this in the DB or next auth attempt will fail")
 		}
 
-		tokenString, err := GenerateToken()
+		tokenString, err := GenerateToken(user.ID)
 		if err != nil {
 			formatter.JSON(w, http.StatusOK, struct{ Message string }{err.Error()})
 			return
@@ -70,12 +70,13 @@ func loginHandler(formatter *render.Render, userRepository user.UserRepository) 
 	}
 }
 
-func GenerateToken() (string, error) {
+func GenerateToken(userID int64) (string, error) {
 	// Create the token
 	token := jwt.New(jwt.SigningMethodHS256)
 	//TODO - Set some claims
 	//token.Claims["foo"] = "bar"
 	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	token.Claims["sub"] = userID
 	// Sign and get the complete encoded token as a string
 	tokenString, err := token.SignedString(signingKey)
 
@@ -84,9 +85,6 @@ func GenerateToken() (string, error) {
 
 func parseToken(req *http.Request) (*jwt.Token, error) {
 	token, err := jwt.ParseFromRequest(req, func(token *jwt.Token) (interface{}, error) {
-
-		fmt.Printf("token --- \nvalid: %v\nmethod: %v\nclaims: %v", token.Valid, token.Method, token.Claims)
-
 		// Don't forget to validate the alg is what you expect:
 		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])

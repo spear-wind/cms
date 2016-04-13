@@ -58,7 +58,7 @@ func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepo
 			}
 		}
 
-		tokenString, err := auth.GenerateToken()
+		tokenString, err := auth.GenerateToken(existingUser.ID)
 		if err != nil {
 			formatter.JSON(w, http.StatusOK, struct{ Message string }{err.Error()})
 			return
