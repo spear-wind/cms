@@ -31,22 +31,23 @@
         }
 
         var userjson = JSON.stringify(fbuser)
-
+/*
         FB.api('/me', {fields: 'first_name,last_name,email'}, function(response) {
           fbuser.first_name = response.first_name
-          fbuser.last_name = response.last_name 
+          fbuser.last_name = response.last_name
           fbuser.email = response.email
           document.getElementById('status').innerHTML = '<pre>' + JSON.stringify(fbuser, null, 2) + '</pre>'
         });
+*/
 
-        /*$.ajax({
+        $.ajax({
           url: '/facebook/login',
           method: 'POST',
           data: userjson,
           success: function(data, textStatus, jqXHR) {
             document.getElementById('status').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>'
           }
-        });*/
+        });
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
       document.getElementById('status').innerHTML = 'Please log into this app.';
