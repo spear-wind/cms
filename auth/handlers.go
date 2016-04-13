@@ -73,10 +73,15 @@ func loginHandler(formatter *render.Render, userRepository user.UserRepository) 
 func GenerateToken(userID int64) (string, error) {
 	// Create the token
 	token := jwt.New(jwt.SigningMethodHS256)
-	//TODO - Set some claims
-	//token.Claims["foo"] = "bar"
+
+	token.Claims["iat"] = time.Now().Unix()
 	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 	token.Claims["sub"] = userID
+	token.Claims["iss"] = "https://cms.spearwind.io"
+	token.Claims["aud"] = "TODO"
+	// token.Claims["nbf"] = ""
+	// token.Claims["jti"] = ""
+
 	// Sign and get the complete encoded token as a string
 	tokenString, err := token.SignedString(signingKey)
 
