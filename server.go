@@ -89,9 +89,9 @@ func newUserRepository() user.UserRepository {
 	return repo
 }
 
-func newFacebookClient() *facebook.Client {
-	appId := os.Getenv("FB_APP_ID")
+func newFacebookClient() facebook.Client {
+	appID := os.Getenv("FB_APP_ID")
 	appSecret := os.Getenv("FB_APP_SECRET")
 
-	return facebook.NewClient(appId, appSecret)
+	return facebook.NewClient(appID, appSecret)
 }

@@ -126,8 +126,8 @@ func TestCreateUserHandler(t *testing.T) {
 			if !strings.Contains(loc[0], "/user/") {
 				t.Errorf("Location header should contain '/user/'")
 			}
-			if loc[0] != "/user/0" {
-				t.Errorf("Expected '/user/0' but was %v", loc[0])
+			if loc[0] != "/user/1" {
+				t.Errorf("Expected '/user/1' but was %v", loc[0])
 			}
 		}
 	}
@@ -137,7 +137,7 @@ func TestCreateUserHandler(t *testing.T) {
 		t.Errorf("Could not unmarshal payload into User object")
 	}
 
-	if user.ID != int64(0) || !strings.Contains(loc[0], strconv.FormatInt(user.ID, 10)) {
+	if user.ID != int64(1) || !strings.Contains(loc[0], strconv.FormatInt(user.ID, 10)) {
 		t.Error("user.ID does not match Location header")
 	}
 
@@ -197,9 +197,9 @@ func TestGetUserListReturnsWhatsInRepository(t *testing.T) {
 	client := &http.Client{}
 	email.NewSender = email.NewNoopSender
 	repo := NewInMemoryRepository()
-	repo.Add(*NewUser(-1, "John", "Doe", "john@doe.com"))
-	repo.Add(*NewUser(-1, "Jane", "Doe", "jane@doe.com"))
-	repo.Add(*NewUser(-1, "Baby", "Doe", "baby@doe.com"))
+	repo.Add(NewUser(-1, "John", "Doe", "john@doe.com"))
+	repo.Add(NewUser(-1, "Jane", "Doe", "jane@doe.com"))
+	repo.Add(NewUser(-1, "Baby", "Doe", "baby@doe.com"))
 	server := httptest.NewServer(http.HandlerFunc(getUserListHandler(formatter, repo)))
 	defer server.Close()
 

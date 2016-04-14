@@ -12,11 +12,11 @@ import (
 	"github.com/unrolled/render"
 )
 
-func InitRoutes(router *mux.Router, formatter *render.Render, userRepository user.UserRepository, fbClient *Client) {
+func InitRoutes(router *mux.Router, formatter *render.Render, userRepository user.UserRepository, fbClient Client) {
 	router.HandleFunc("/facebook/login", facebookLoginHandler(formatter, userRepository, fbClient)).Methods("POST")
 }
 
-func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepository, fbClient *Client) http.HandlerFunc {
+func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepository, fbClient Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		payload, _ := ioutil.ReadAll(req.Body)
 
@@ -27,16 +27,20 @@ func facebookLoginHandler(formatter *render.Render, userRepository user.UserRepo
 			return
 		}
 
-		fmt.Printf("fb user id: %v", cmd.UserID)
+		if result := cmd.validate(); result.HasErrors() {
+			formatter.JSON(w, http.StatusBadRequest, map[string]interface{}{
+				"errors": result.Errors,
+			})
+			return
+		}
 
 		fbUser, err := fbClient.getUser(cmd)
-
-		fmt.Printf("fb user id: %v", fbUser.FacebookID)
-
 		if err != nil {
 			formatter.Text(w, http.StatusBadRequest, err.Error())
 			return
 		}
+
+		fmt.Printf("fb user: %v\n", fbUser)
 
 		existingUser := userRepository.FindByFacebookID(fbUser.FacebookID)
 		if existingUser == nil {

@@ -5,6 +5,7 @@ import (
 
 	fb "github.com/huandu/facebook"
 	"github.com/spear-wind/cms/user"
+	"github.com/spear-wind/cms/validator"
 )
 
 type loginCommand struct {
@@ -15,9 +16,31 @@ type loginCommand struct {
 	UserID        string `json:"id"`
 }
 
+func (cmd *loginCommand) validate() (result validator.ValidationResult) {
+	result = validator.NewValidationResult()
+
+	if len(cmd.AccessToken) == 0 {
+		result.AddError("access_token", "Access Token is required")
+	}
+
+	if cmd.ExpiresIn == int64(0) {
+		result.AddError("expires_in", "Expires In is required")
+	}
+
+	if len(cmd.SignedRequest) == 0 {
+		result.AddError("signed_request", "Signed Request is required")
+	}
+
+	if len(cmd.UserID) == 0 {
+		result.AddError("id", "id is required")
+	}
+
+	return result
+}
+
 func (cmd loginCommand) String() string {
 	return fmt.Sprintf(
-		"user id: %d\naccess token: %s\nexpires in: %d\nsigned request: %s\n",
+		"user id: %s\naccess token: %s\nexpires in: %d\nsigned request: %s\n",
 		cmd.UserID,
 		cmd.AccessToken,
 		cmd.ExpiresIn,
@@ -25,19 +48,23 @@ func (cmd loginCommand) String() string {
 	)
 }
 
-type Client struct {
+type Client interface {
+	getUser(cmd loginCommand) (*user.User, error)
+}
+
+type facebookClient struct {
 	clientID     string
 	clientSecret string
 }
 
-func NewClient(clientID string, clientSecret string) *Client {
-	return &Client{
+func NewClient(clientID string, clientSecret string) Client {
+	return &facebookClient{
 		clientID:     clientID,
 		clientSecret: clientSecret,
 	}
 }
 
-func (c *Client) getUser(cmd loginCommand) (*user.User, error) {
+func (c *facebookClient) getUser(cmd loginCommand) (*user.User, error) {
 	user := &user.User{
 		FacebookID: cmd.UserID,
 	}
