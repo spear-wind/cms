@@ -11,6 +11,7 @@ import (
 	"github.com/spear-wind/cms/events"
 	"github.com/spear-wind/cms/facebook"
 	"github.com/spear-wind/cms/registration"
+	"github.com/spear-wind/cms/site"
 	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
 )
@@ -22,6 +23,7 @@ func NewServer() *negroni.Negroni {
 	eventPublisher := newEventPublisher(emailSender)
 	userRepository := newUserRepository()
 	facebookClient := newFacebookClient()
+	siteRepository := newSiteRepository()
 
 	n := negroni.Classic()
 	router := mux.NewRouter()
@@ -35,6 +37,13 @@ func NewServer() *negroni.Negroni {
 	router.PathPrefix("/user").Handler(negroni.New(
 		negroni.HandlerFunc(auth.IsAuthorized(formatter)),
 		negroni.Wrap(userRouter),
+	))
+
+	siteRouter := mux.NewRouter()
+	site.InitRoutes(siteRouter, formatter, siteRepository, eventPublisher)
+	router.PathPrefix("/site").Handler(negroni.New(
+		negroni.HandlerFunc(auth.IsAuthorized(formatter)),
+		negroni.Wrap(siteRouter),
 	))
 
 	n.UseHandler(router)
@@ -94,4 +103,23 @@ func newFacebookClient() facebook.Client {
 	appSecret := os.Getenv("FB_APP_SECRET")
 
 	return facebook.NewClient(appID, appSecret)
+}
+
+func newSiteRepository() site.SiteRepository {
+	profile := os.Getenv("PROFILE")
+
+	var repo site.SiteRepository
+
+	if profile == "mysql" {
+		// db, err := common.NewDbConn()
+		// if err != nil {
+		// 	repo = newMysqlRepository(db)
+		// }
+		//TODO - what backing store will we use for this service?
+	} else {
+		fmt.Println("Using in-memory repositories")
+		repo = site.NewInMemoryRepository()
+	}
+
+	return repo
 }
