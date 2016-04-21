@@ -45,11 +45,6 @@ build:
           go test ./...
 
     - script:
-        name: cross platform release
-        code: |
-          (GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=1.0" && mkdir -p build/linux64 && mv cms build/linux64)
-
-    - script:
         name: trigger dockerhub build
         code: |
           (curl -H "Content-Type: application/json" --data '{"build": true}' -X POST $DOCKER_HUB_BUILD_TRIGGER)
