@@ -29,3 +29,9 @@ The system is configured via environment variables. These are the available envi
 Tests require slightly different setup.
 
 `EMAIL_TEMPLATE_DIR='../email-templates' go test ./...`
+
+## Build Docker Image
+
+`GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=1.0" && mkdir -p build/linux64 && mv cms build/linux64`
+
+`docker build -t dmalone/spearwind-cms .`
