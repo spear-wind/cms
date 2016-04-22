@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cloudnativego/cfmgo"
 	"github.com/codegangsta/negroni"
 	"github.com/dave-malone/email"
 	"github.com/gorilla/mux"
@@ -80,18 +81,16 @@ func newEventPublisher(emailSender email.Sender) events.EventPublisher {
 }
 
 func newUserRepository() user.UserRepository {
-	profile := os.Getenv("PROFILE")
+	mongoDBURL := os.Getenv("MONGO_URL")
 
 	var repo user.UserRepository
 
-	if profile == "mysql" {
-		// db, err := common.NewDbConn()
-		// if err != nil {
-		// 	repo = newMysqlRepository(db)
-		// }
-		//TODO - what backing store will we use for this service?
+	if len(mongoDBURL) != 0 {
+		userCollection := cfmgo.Connect(cfmgo.NewCollectionDialer, mongoDBURL, "users")
+		fmt.Println("Using to MongoDB user repository")
+		repo = user.NewMongoUserRepository(userCollection)
 	} else {
-		fmt.Println("Using in-memory repositories")
+		fmt.Println("Using in-memory user repository")
 		repo = user.NewInMemoryRepository()
 	}
 
@@ -106,20 +105,21 @@ func newFacebookClient() facebook.Client {
 }
 
 func newSiteRepository() site.SiteRepository {
-	profile := os.Getenv("PROFILE")
+	fmt.Println("Using in-memory site repository")
+	return site.NewInMemoryRepository()
 
-	var repo site.SiteRepository
-
-	if profile == "mysql" {
-		// db, err := common.NewDbConn()
-		// if err != nil {
-		// 	repo = newMysqlRepository(db)
-		// }
-		//TODO - what backing store will we use for this service?
-	} else {
-		fmt.Println("Using in-memory repositories")
-		repo = site.NewInMemoryRepository()
-	}
-
-	return repo
+	// mongoDBURL := os.Getenv("MONGO_URL")
+	//
+	// var repo site.SiteRepository
+	//
+	// if len(mongoDBURL) != 0 {
+	// 	siteCollection := cfmgo.Connect(cfmgo.NewCollectionDialer, mongoDBURL, "sites")
+	// 	fmt.Println("Using to MongoDB site repository")
+	// 	repo = site.NewMongoSiteRepository(siteCollection)
+	// } else {
+	// 	fmt.Println("Using in-memory site repository")
+	// 	repo = site.NewInMemoryRepository()
+	// }
+	//
+	// return repo
 }

@@ -13,7 +13,7 @@ type UserRepository interface {
 	Add(user *User) (err error)
 	Update(user *User) (err error)
 	listUsers() (users []*User)
-	getUser(id string) (user *User, err error)
+	getUser(id int64) (user *User, err error)
 	Exists(user *User) bool
 	FindByEmail(emailAddress string) (user *User)
 	FindByVerificationCode(verificationCode string) (user *User)

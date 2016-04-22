@@ -1,9 +1,6 @@
 package user
 
-import (
-	"errors"
-	"strconv"
-)
+import "errors"
 
 type inMemoryRepository struct {
 	users map[int64]*User
@@ -34,11 +31,11 @@ func (repo *inMemoryRepository) listUsers() (users []*User) {
 	return users
 }
 
-func (repo *inMemoryRepository) getUser(id string) (user *User, err error) {
+func (repo *inMemoryRepository) getUser(userID int64) (user *User, err error) {
 	found := false
 
 	for _, target := range repo.users {
-		if userID, err := strconv.ParseInt(id, 10, 64); err == nil && userID == target.ID {
+		if userID == target.ID {
 			user = target
 			found = true
 		}

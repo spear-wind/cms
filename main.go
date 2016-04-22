@@ -11,8 +11,7 @@ func main() {
 		port = "3000"
 	}
 
-	fmt.Printf("Running server on port %v\n", port)
-
 	server := NewServer()
 	server.Run(":" + port)
+	fmt.Printf("Running server on port %v\n", port)
 }

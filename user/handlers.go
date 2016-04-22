@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/events"
@@ -68,7 +69,14 @@ func getUserListHandler(formatter *render.Render, userRepository UserRepository)
 func getUserHandler(formatter *render.Render, userRepository UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
-		userID := vars["id"]
+
+		userID, err := strconv.ParseInt(vars["id"], 10, 64)
+		if err != nil {
+			formatter.JSON(w, http.StatusNotFound, map[string]interface{}{
+				"error": "Invalid User ID",
+			})
+			return
+		}
 
 		if user, err := userRepository.getUser(userID); err != nil {
 			formatter.JSON(w, http.StatusNotFound, map[string]interface{}{

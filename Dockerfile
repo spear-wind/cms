@@ -12,6 +12,7 @@ ENV AWS_SECRET_ACCESS_KEY awssecretaccesskey
 ENV EMAIL_TEMPLATE_DIR ./
 ENV FB_APP_ID fbappid
 ENV FB_APP_SECRET fbappsecret
+ENV MONGO_URL mongourl
 
 RUN git clone https://github.com/spear-wind/cms /go/src/spear-wind/cms
 RUN ls /go/src/spear-wind/cms

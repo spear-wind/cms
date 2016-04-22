@@ -23,6 +23,7 @@ The system is configured via environment variables. These are the available envi
 1. EMAIL_TEMPLATE_DIR - the location of the directory containing all of the email templates
 1. FB_APP_ID - Facebook Application ID, for use with Facebook Login
 1. FB_APP_SECRET  - Facebook Application Secret, for use with Facebook Login
+1. MONGO_URL - Mongo DB Connection URL; e.g. mongodb://127.0.0.1:27017/spearwind-cms
 
 
 ## Testing
