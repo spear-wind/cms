@@ -50,7 +50,7 @@ build:
           (curl -H "Content-Type: application/json" --data '{"build": true}' -X POST $DOCKER_HUB_BUILD_TRIGGER)
 
   after-steps:
-    - sherzberg/slack-notify:
-        subdomain: wercker
-        token: $SLACK_TOKEN
-        channel: cms-activity
+    - script:
+        name: slack notify
+        code: |
+          (curl -X POST --data-urlencode 'payload={"channel": "#cms-activity", "username": "wercker-webhookbot", "text": "cms build success", "icon_emoji": ":wercker:"}' https://hooks.slack.com/services/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)
