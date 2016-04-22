@@ -53,4 +53,4 @@ build:
     - script:
         name: slack notify
         code: |
-          (curl -X POST --data-urlencode 'payload={"channel": "#cms-activity", "username": "wercker-webhookbot", "text": "cms build success", "icon_emoji": ":wercker:"}' https://hooks.slack.com/services/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)
+          (curl -X POST --data-urlencode 'payload={"channel": "#cms-activity", "username": "wercker-webhookbot", "text": "cms build $WERCKER_RESULT: $WERCKER_FAILED_STEP_MESSAGE $WERCKER_BUILD_URL", "icon_emoji": ":wercker:"}' $SLACK_WEBHOOK_URL)
