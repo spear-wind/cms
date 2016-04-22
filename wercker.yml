@@ -48,3 +48,9 @@ build:
         name: trigger dockerhub build
         code: |
           (curl -H "Content-Type: application/json" --data '{"build": true}' -X POST $DOCKER_HUB_BUILD_TRIGGER)
+
+    after-steps:
+        - sherzberg/slack-notify:
+            subdomain: wercker
+            token: $SLACK_TOKEN
+            channel: cms-activity
