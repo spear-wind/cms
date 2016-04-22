@@ -1,0 +1,2 @@
+X_DOCKER_HUB_BUILD_TRIGGER='https://registry.hub.docker.com/u/dmalone/spearwind-cms-api/trigger/bef237ec-53f7-45c3-94c4-db08f07510f8/'
+X_SLACK_WEBHOOK_URL='https://hooks.slack.com/services/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'

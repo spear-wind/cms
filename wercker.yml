@@ -47,15 +47,10 @@ build:
     - script:
         name: trigger dockerhub build
         code: |
-          (curl -H "Content-Type: application/json" --data '{"build": true}' -X POST $DOCKER_HUB_BUILD_TRIGGER)
+          curl -H "Content-Type: application/json" --data '{"build": true}' -X POST $DOCKER_HUB_BUILD_TRIGGER
 
   after-steps:
     - script:
-        name: echo wercker vars
-        code: |
-          echo $WERCKER_RESULT $WERCKER_BUILD_URL
-          
-    - script:
         name: slack notify
         code: |
-          curl -X POST --data-urlencode 'payload={"channel": "#cms-activity", "username": "wercker-bot", "text": "cms build $WERCKER_RESULT: $WERCKER_BUILD_URL", "icon_emoji": ":wercker:"}' $SLACK_WEBHOOK_URL
+          curl -X POST --data-urlencode "payload={\"channel\": \"#cms-activity\", \"username\": \"wercker-bot\", \"text\": \"cms build $WERCKER_RESULT: $WERCKER_BUILD_URL\", \"icon_emoji\": \":wercker:\"}" $SLACK_WEBHOOK_URL
