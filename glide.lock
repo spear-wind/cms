@@ -1,0 +1,56 @@
+hash: bf7068129a2e2da35f957c89eff6f80844b7f1edbd21e05b9524a14bd0ad8ef4
+updated: 2016-11-16T09:49:22.255625927-05:00
+imports:
+- name: github.com/cloudnativego/cfmgo
+  version: 35605f2df87ae242b8c1fdef3c7ebc07916e339b
+  subpackages:
+  - params
+- name: github.com/codegangsta/negroni
+  version: e0e50f7dc431c043cb33f91b09c3419d48b7cff5
+- name: github.com/dave-malone/email
+  version: 15715ea488cc969b30adf50f9bcf1b4c0664e9fa
+- name: github.com/dgrijalva/jwt-go
+  version: 9ed569b5d1ac936e6494082958d63a6aa4fff99a
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 757bef944d0f21880861c2dd9c871ca543023cba
+- name: github.com/huandu/facebook
+  version: 09d747bf3afe65c084508baa5d25a2553ce21496
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
+- name: github.com/unrolled/render
+  version: 526faf80cd4b305bb8134abea8d20d5ced74faa6
+- name: github.com/xchapter7x/lo
+  version: e33b245fc7a8186582208abc2458c2691bff681c
+- name: golang.org/x/crypto
+  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
+  subpackages:
+  - bcrypt
+  - blowfish
+  - scrypt
+  - pbkdf2
+- name: gopkg.in/hlandau/easymetric.v1
+  version: 1c173222e345c2ba115e0f483821c6da2d3b0fa9
+  subpackages:
+  - cexp
+- name: gopkg.in/hlandau/measurable.v1
+  version: d96a009bd9bda94dd1294105e67e8c1794e533d3
+- name: gopkg.in/hlandau/passlib.v1
+  version: 933f1c3f63ffb0d17de04c3174f875ae683a33cd
+  subpackages:
+  - abstract
+  - hash/bcrypt
+  - hash/bcryptsha256
+  - hash/scrypt
+  - hash/sha2crypt
+  - hash/scrypt/raw
+  - hash/sha2crypt/raw
+- name: gopkg.in/mgo.v2
+  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  subpackages:
+  - bson
+  - internal/json
+  - internal/sasl
+  - internal/scram
+devImports: []

@@ -1,7 +1,6 @@
 # cms
 
-
-[![wercker status](https://app.wercker.com/status/475e09b299697263c1d546fc24e9b5d7/m "wercker status")](https://app.wercker.com/project/bykey/475e09b299697263c1d546fc24e9b5d7)
+[![Build Status](http://ci.dmalone.io/api/v1/teams/spearwind/pipelines/hello-world/jobs/hello-world/badge)](http://ci.dmalone.io/teams/spearwind/pipelines/hello-world/jobs/hello-world/builds/)
 
 [API Docs](http://docs.spearwind.apiary.io/#)
 
@@ -26,13 +25,32 @@ The system is configured via environment variables. These are the available envi
 1. MONGO_URL - Mongo DB Connection URL; e.g. mongodb://127.0.0.1:27017/spearwind-cms
 
 
-## Testing
-Tests require slightly different setup.
-
-`EMAIL_TEMPLATE_DIR='../email-templates' go test ./...`
-
 ## Build Docker Image
 
 `GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=1.0" && mkdir -p build/linux64 && mv cms build/linux64`
 
 `docker build -t dmalone/spearwind-cms .`
+
+## Develop
+
+This project uses [Glide](https://github.com/Masterminds/glide)
+
+To setup your local workspace, first clone this project, and then run `glide install`
+
+To run the project test suite, run `go test $(glide novendor)`
+
+## Testing
+Tests require slightly different setup.
+
+`EMAIL_TEMPLATE_DIR='../email-templates' go test ./...`
+
+## Testing individual tasks using fly
+Params for individual tasks will be read from your local environment variables. To run a task that requires params:
+
+```
+cms $ fly -t spearwind execute -c \
+  ./ci/test.yml \
+  --input cms=.
+```
+
+Note that the params defined in the tasks yml file must be *blank* in order for them to be replaced via the environment variables set for your environment

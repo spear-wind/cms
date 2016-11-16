@@ -7,6 +7,7 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gorilla/mux"
 	"github.com/spear-wind/cms/user"
 	"github.com/unrolled/render"
@@ -74,13 +75,15 @@ func GenerateToken(userID int64) (string, error) {
 	// Create the token
 	token := jwt.New(jwt.SigningMethodHS256)
 
-	token.Claims["iat"] = time.Now().Unix()
-	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	token.Claims["sub"] = userID
-	token.Claims["iss"] = "https://cms.spearwind.io"
-	token.Claims["aud"] = "TODO"
-	// token.Claims["nbf"] = ""
-	// token.Claims["jti"] = ""
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["iat"] = time.Now().Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["sub"] = userID
+	claims["iss"] = "https://cms.spearwind.io"
+	claims["aud"] = "TODO"
+	// claims["nbf"] = ""
+	// claims["jti"] = ""
 
 	// Sign and get the complete encoded token as a string
 	tokenString, err := token.SignedString(signingKey)
@@ -89,7 +92,7 @@ func GenerateToken(userID int64) (string, error) {
 }
 
 func parseToken(req *http.Request) (*jwt.Token, error) {
-	token, err := jwt.ParseFromRequest(req, func(token *jwt.Token) (interface{}, error) {
+	token, err := request.ParseFromRequest(req, request.OAuth2Extractor, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])

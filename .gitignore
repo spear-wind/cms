@@ -3,3 +3,4 @@ tmp/
 _builds/
 _projects/
 _steps/
+vendor/

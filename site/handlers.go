@@ -41,7 +41,7 @@ func createSiteHandler(formatter *render.Render, siteRepository SiteRepository, 
 				"error": err.Error(),
 			})
 		} else {
-			w.Header().Add("Location", fmt.Sprintf("/site/%d", site.ID))
+			w.Header().Add("Location", fmt.Sprintf("/site/%v", site.ID))
 			formatter.JSON(w, http.StatusCreated, site)
 			//TODO newSiteCreatedEvent(user)
 		}
