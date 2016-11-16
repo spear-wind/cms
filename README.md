@@ -1,6 +1,6 @@
 # cms
 
-[![Build Status](http://ci.dmalone.io/api/v1/teams/spearwind/pipelines/hello-world/jobs/hello-world/badge)](http://ci.dmalone.io/teams/spearwind/pipelines/hello-world/jobs/hello-world/builds/)
+[![Test Status](http://ci.dmalone.io/api/v1/teams/spearwind/pipelines/spearwind-cms/jobs/test-app/badge)](http://ci.dmalone.io/teams/spearwind/pipelines/spearwind-cms)
 
 [API Docs](http://docs.spearwind.apiary.io/#)
 
