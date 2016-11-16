@@ -1,6 +1,6 @@
 # cms
 
-[![Test Status](http://ci.dmalone.io/api/v1/teams/spearwind/pipelines/spearwind-cms/jobs/test-app/badge)](http://ci.dmalone.io/teams/spearwind/pipelines/spearwind-cms)
+[![Test Status](http://ci.dmalone.io/api/v1/teams/spearwind/pipelines/cms-service/jobs/test-app/badge)](http://ci.dmalone.io/teams/spearwind/pipelines/cms-service)
 
 [API Docs](http://docs.spearwind.apiary.io/#)
 
@@ -10,7 +10,6 @@
 `go build && ./cms`
 
 Optionally, use [fresh](https://github.com/pilu/fresh) to auto-reload changes to speed up your dev cycles.
-
 
 ## System Configuration
 
@@ -22,14 +21,8 @@ The system is configured via environment variables. These are the available envi
 1. EMAIL_TEMPLATE_DIR - the location of the directory containing all of the email templates
 1. FB_APP_ID - Facebook Application ID, for use with Facebook Login
 1. FB_APP_SECRET  - Facebook Application Secret, for use with Facebook Login
-1. MONGO_URL - Mongo DB Connection URL; e.g. mongodb://127.0.0.1:27017/spearwind-cms
+1. MONGO_URL - Mongo DB Connection URL; e.g. mongodb://127.0.0.1:27017/cms-admin
 
-
-## Build Docker Image
-
-`GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=1.0" && mkdir -p build/linux64 && mv cms build/linux64`
-
-`docker build -t dmalone/spearwind-cms .`
 
 ## Develop
 
@@ -39,12 +32,9 @@ To setup your local workspace, first clone this project, and then run `glide ins
 
 To run the project test suite, run `go test $(glide novendor)`
 
-## Testing
-Tests require slightly different setup.
-
-`EMAIL_TEMPLATE_DIR='../email-templates' go test ./...`
 
 ## Testing individual tasks using fly
+
 Params for individual tasks will be read from your local environment variables. To run a task that requires params:
 
 ```
@@ -54,3 +44,9 @@ cms $ fly -t spearwind execute -c \
 ```
 
 Note that the params defined in the tasks yml file must be *blank* in order for them to be replaced via the environment variables set for your environment
+
+## Build Docker Image
+
+`GOOS=linux GOARCH=amd64 go build -ldflags "-X main.VERSION=1.0" && mkdir -p build/linux64 && mv cms build/linux64`
+
+`docker build -t dmalone/cms-admin .`
