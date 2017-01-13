@@ -32,8 +32,18 @@ To setup your local workspace, first clone this project, and then run `glide ins
 
 To run the project test suite, run `go test $(glide novendor)`
 
+## Pipelines
 
-## Testing individual tasks using fly
+Concourse pipelines are hosted at ci.dmalone.io under a team named Spearwind, with Github auth setup to allow anyone associated with the spear-wind org in Github to use this team. To target and login to Concourse:
+
+    fly -t dmalone login -c http://ci.dmalone.io:8080
+    fly login -n spearwind -t dmalone -c http://ci.dmalone.io
+
+### Modify the pipeline and update in Concourse
+
+    fly -t dmalone sp -p cms-sevice -c ci/pipeline.yml
+
+### Testing individual tasks using fly
 
 Params for individual tasks will be read from your local environment variables. To run a task that requires params:
 
